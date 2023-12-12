@@ -1,0 +1,123 @@
+---
+title: "Data Mining"
+output: html_notebook
+toc: yes
+toc_float: yes
+author: Syed Alle Mustafa
+---
+
+## Part 2.1
+
+### Part 2.1-a-i
+```{r}
+cat("Yes, name field should be ommited, because it is of no use while perform clustering. I will remove the name field in next few steps.")
+```
+
+### Part 2.1-a-ii
+```{r}
+cat("Yes, we should standardize the data because the columns are in different scales, and their distance measures would be different and it will effect how they contribute, so, standardizing the columns will transform them to a unified scale.")
+```
+### Part 2.1-a-iii
+```{r}
+cat("I have extracted the dataframe using python, and attached the scripts.")
+data <- read.csv("output.csv")
+data$Name = NULL
+data_std <- scale(data)
+head(data_std)
+```
+### Part 2.1-b-i
+
+```{r}
+#install.packages("factoextra")
+library(factoextra)
+fviz_nbclust(data_std, kmeans, method="silhouette")
+cat("8 clusters seems optimal for clustering")
+```
+### Part 2.1-b-ii
+```{r}
+kms <- kmeans(data_std, center= 8)
+fviz_cluster(kms, data=data_std, main="Scaled clusters")
+```
+
+### Part 2.1-b-iii
+```{r}
+table(kms$cluster)
+```
+
+### Part 2.1-b-iv
+```{r}
+cat("total SSE: ",sum(kms$withinss))
+```
+
+### Part 2.1-b-v
+```{r}
+ kms$withinss
+```
+
+### Part 2.1-b-vi
+```{r}
+data <- read.csv("output.csv")
+cat("Cluster:1 ", paste(data[which(kms$cluster == 1), c('Name')], collapse = (", ")),"\n")
+cat("Cluster:2 ", paste(data[which(kms$cluster == 2), c('Name')], collapse = (", ")),"\n")
+cat("Cluster:3 ", paste(data[which(kms$cluster == 3), c('Name')], collapse = (", ")),"\n")
+cat("Cluster:4 ", paste(data[which(kms$cluster == 4), c('Name')], collapse = (", ")),"\n")
+cat("Cluster:5 ", paste(data[which(kms$cluster == 5), c('Name')], collapse = (", ")),"\n")
+cat("Cluster:6 ", paste(data[which(kms$cluster == 6), c('Name')], collapse = (", ")),"\n")
+cat("Cluster:7 ", paste(data[which(kms$cluster == 7), c('Name')], collapse = (", ")),"\n")
+cat("Cluster:8 ", paste(data[which(kms$cluster == 8), c('Name')], collapse = (", ")),"\n")
+cat("\n\n As we can see bats, rats/mouses/, sea mammals, etc are grouped together, so the results seems correct. Expect wolverine doesnt belong to first cluster, also some seals and otter from cluster 8 look as misclassified.")
+```
+## Part 2.2
+### Part 2.2-a
+```{r}
+s1 <- read.csv("s1.csv")
+s1
+cat("Yes, standardization is important, because x and y are on different scales.")
+s1_scale<- scale(s1)
+s1_scale  
+```
+
+### Part 2.2-b-i
+```{r}
+plot(s1_scale, main="Data")
+cat("I see 15 clusters, and all of them are well separated.")
+```
+### Part 2.2-c-i
+```{r}
+fviz_nbclust(s1_scale, kmeans, method="wss",k.max=30)
+```
+### Part 2.2-c-ii
+```{r}
+fviz_nbclust(s1_scale, kmeans, method="silhouette",k.max=30)
+```
+### Part 2.2-c-iii
+```{r}
+cat("No, the clusters by kmeans method are 19, where as visually 15 clusters seems good")
+```
+### Part 2.2-d-i
+```{r}
+kms <- kmeans(s1_scale, center= 19)
+fviz_cluster(kms, data=s1_scale)
+```
+### Part 2.2-d-ii
+```{r}
+cat("The clustering performed by kmeans does not look very good, in three instances one cluster is separated in to three clusters, where few of the clusters seem fine")
+```
+### Part 2.2-e-i
+```{r}
+minpts = 8
+cat("choosing minpts=8 looks good, this way clusters would not be too small neither too large")
+```
+### Part 2.2-d-i
+```{r}
+#install.packages("dbscan")
+#-install.packages("fpc")
+library(fpc)
+library(factoextra)
+library(dbscan)
+kNNdistplot(s1_scale, k = minpts)
+cat("since the elbow is 0.10, so i chose eps=0.10")
+dbs <- fpc::dbscan(s1_scale, eps = 0.10, MinPts = minpts)
+plot(dbs, s1_scale)
+cat("At minPts = 8, eps = 0.10, there are 15 clusters")
+```
